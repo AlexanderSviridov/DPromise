@@ -1,0 +1,13 @@
+PODS:
+  - LinqToObjectiveC (2.1.0)
+  - OCMock (3.2.2)
+
+DEPENDENCIES:
+  - LinqToObjectiveC (~> 2.1.0)
+  - OCMock (~> 3.1)
+
+SPEC CHECKSUMS:
+  LinqToObjectiveC: f0e40c137a458b6b9725c4c7b6a575c0c72e3aec
+  OCMock: 18c9b7e67d4c2770e95bb77a9cc1ae0c91fe3835
+
+COCOAPODS: 0.39.0
