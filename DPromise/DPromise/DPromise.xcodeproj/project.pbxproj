@@ -17,6 +17,7 @@
 		B62F2CA01C8E417400395D41 /* DPromiseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B62F2C9F1C8E417400395D41 /* DPromiseTests.m */; };
 		B62F2CAB1C8E417400395D41 /* DPromiseUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B62F2CAA1C8E417400395D41 /* DPromiseUITests.m */; };
 		B62F2CBB1C8E4B5F00395D41 /* DPromise.m in Sources */ = {isa = PBXBuildFile; fileRef = B62F2CBA1C8E4B5F00395D41 /* DPromise.m */; };
+		B66EFEDC1D4FACE300E8BB5D /* DCollections.m in Sources */ = {isa = PBXBuildFile; fileRef = B66EFEDB1D4FACE300E8BB5D /* DCollections.m */; };
 		CD080C2904FBBBE6D01002DD /* libPods-DPromiseTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E06BA31D866D3B9398284D9 /* libPods-DPromiseTests.a */; };
 /* End PBXBuildFile section */
 
@@ -60,6 +61,8 @@
 		B62F2CAC1C8E417400395D41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B62F2CB91C8E4B5F00395D41 /* DPromise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPromise.h; sourceTree = "<group>"; };
 		B62F2CBA1C8E4B5F00395D41 /* DPromise.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPromise.m; sourceTree = "<group>"; };
+		B66EFEDA1D4FACE300E8BB5D /* DCollections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCollections.h; sourceTree = "<group>"; };
+		B66EFEDB1D4FACE300E8BB5D /* DCollections.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCollections.m; sourceTree = "<group>"; };
 		C63FC608E67B4958EACD01DC /* Pods-DPromiseTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DPromiseTests.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-DPromiseTests/Pods-DPromiseTests.debug.xcconfig"; sourceTree = "<group>"; };
 		E648D351BBD6BDBC6F4BA26D /* Pods-DPromise.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DPromise.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-DPromise/Pods-DPromise.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -170,6 +173,8 @@
 		B62F2CB81C8E4B5F00395D41 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B66EFEDA1D4FACE300E8BB5D /* DCollections.h */,
+				B66EFEDB1D4FACE300E8BB5D /* DCollections.m */,
 				B62F2CB91C8E4B5F00395D41 /* DPromise.h */,
 				B62F2CBA1C8E4B5F00395D41 /* DPromise.m */,
 			);
@@ -193,12 +198,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B62F2CAF1C8E417400395D41 /* Build configuration list for PBXNativeTarget "DPromise" */;
 			buildPhases = (
-				7ECCB56FE88B0B84EE94C327 /* Check Pods Manifest.lock */,
+				7ECCB56FE88B0B84EE94C327 /* [CP] Check Pods Manifest.lock */,
 				B62F2C7E1C8E417400395D41 /* Sources */,
 				B62F2C7F1C8E417400395D41 /* Frameworks */,
 				B62F2C801C8E417400395D41 /* Resources */,
-				8BAE88A3D15D59C1DCD5E5EF /* Embed Pods Frameworks */,
-				45D6F89979A3145E3BA25966 /* Copy Pods Resources */,
+				8BAE88A3D15D59C1DCD5E5EF /* [CP] Embed Pods Frameworks */,
+				45D6F89979A3145E3BA25966 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -213,12 +218,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B62F2CB21C8E417400395D41 /* Build configuration list for PBXNativeTarget "DPromiseTests" */;
 			buildPhases = (
-				AC6E11F0475FBC855AC678DA /* Check Pods Manifest.lock */,
+				AC6E11F0475FBC855AC678DA /* [CP] Check Pods Manifest.lock */,
 				B62F2C971C8E417400395D41 /* Sources */,
 				B62F2C981C8E417400395D41 /* Frameworks */,
 				B62F2C991C8E417400395D41 /* Resources */,
-				82AF6BF419198F33D8A629F1 /* Embed Pods Frameworks */,
-				2EC4F837F5B58BB14D81CF98 /* Copy Pods Resources */,
+				82AF6BF419198F33D8A629F1 /* [CP] Embed Pods Frameworks */,
+				2EC4F837F5B58BB14D81CF98 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -321,14 +326,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2EC4F837F5B58BB14D81CF98 /* Copy Pods Resources */ = {
+		2EC4F837F5B58BB14D81CF98 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -336,14 +341,14 @@
 			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-DPromiseTests/Pods-DPromiseTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		45D6F89979A3145E3BA25966 /* Copy Pods Resources */ = {
+		45D6F89979A3145E3BA25966 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -351,14 +356,14 @@
 			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-DPromise/Pods-DPromise-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		7ECCB56FE88B0B84EE94C327 /* Check Pods Manifest.lock */ = {
+		7ECCB56FE88B0B84EE94C327 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -366,14 +371,14 @@
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
-		82AF6BF419198F33D8A629F1 /* Embed Pods Frameworks */ = {
+		82AF6BF419198F33D8A629F1 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -381,14 +386,14 @@
 			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-DPromiseTests/Pods-DPromiseTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		8BAE88A3D15D59C1DCD5E5EF /* Embed Pods Frameworks */ = {
+		8BAE88A3D15D59C1DCD5E5EF /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -396,14 +401,14 @@
 			shellScript = "\"${SRCROOT}/../Pods/Target Support Files/Pods-DPromise/Pods-DPromise-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AC6E11F0475FBC855AC678DA /* Check Pods Manifest.lock */ = {
+		AC6E11F0475FBC855AC678DA /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,6 +423,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B66EFEDC1D4FACE300E8BB5D /* DCollections.m in Sources */,
 				B62F2C8D1C8E417400395D41 /* ViewController.m in Sources */,
 				B62F2CBB1C8E4B5F00395D41 /* DPromise.m in Sources */,
 				B62F2C8A1C8E417400395D41 /* AppDelegate.m in Sources */,

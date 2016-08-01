@@ -1,5 +1,5 @@
 workspace 'DPromise.xcworkspace'
-xcodeproj 'DPromise/DPromise.xcodeproj'
+project 'DPromise/DPromise.xcodeproj'
 
 # ignore all warnings from all pods
 inhibit_all_warnings!
@@ -7,13 +7,13 @@ inhibit_all_warnings!
 source 'https://github.com/CocoaPods/Specs.git'
 
 target :DPromise do
-	pod 'LinqToObjectiveC', '~> 2.1.0'
+	# pod 'LinqToObjectiveC', '~> 2.1.0'
 	platform :ios, '7.0'
-	xcodeproj 'DPromise/DPromise.xcodeproj'
+	project 'DPromise/DPromise.xcodeproj'
 end
 
 target :DPromiseTests do
 	pod 'OCMock', '~> 3.1'
 	platform :ios, '7.0'
-	xcodeproj 'DPromise/DPromise.xcodeproj'
+	project 'DPromise/DPromise.xcodeproj'
 end

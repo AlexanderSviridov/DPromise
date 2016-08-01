@@ -29,7 +29,7 @@
 - (void)testCreation
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@""];
-    DPromise *newPromise = [DPromise newPromise:^MSPromiseDisposable(MSPromiseFullfillBlock fullfill, MSPromiseRejectBclock reject) {
+    DPromise *newPromise = [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfill, DPromiseRejectBclock reject) {
         fullfill(@2);
         return nil;
     }];

@@ -8,20 +8,21 @@
 
 #import "DPromise.h"
 
-#import "LinqToObjectiveC.h"
+//#import "LinqToObjectiveC.h"
+#import "DCollections.h"
 
-@interface MSPromiseListengerContainer : NSObject
+@interface DPromiseListengerContainer : NSObject
 
 @property DPromise *promise;
 @property (copy) void(^onCompleate)(id, NSError *, DPromise *);
 
 @end
 
-@implementation MSPromiseListengerContainer
+@implementation DPromiseListengerContainer
 
 + (instancetype)listengerWithPromise:(DPromise *)promise compleationBlock:(void(^)(id, NSError *, DPromise *))compleation
 {
-    MSPromiseListengerContainer *container = [MSPromiseListengerContainer new];
+    DPromiseListengerContainer *container = [DPromiseListengerContainer new];
     container.promise = promise;
     container.onCompleate = compleation;
     return container;
@@ -31,7 +32,7 @@
 
 @interface DPromise ()
 
-@property NSArray<MSPromiseListengerContainer *> *listengers;
+@property NSArray<DPromiseListengerContainer *> *listengers;
 @property id compleatedValue;
 @property NSError *compleatedError;
 @property (weak) DPromise *prevPromise;
@@ -191,12 +192,12 @@
 
 - (void)cleanInvalidListengers
 {
-    self.listengers = [self.listengers linq_where:^BOOL(MSPromiseListengerContainer *container) {
+    self.listengers = [self.listengers mapArray:^id(DPromiseListengerContainer *container) {
         if ( !container.promise ) {
             container.onCompleate = nil;
-            return NO;
+            return nil;
         }
-        return YES;
+        return container;
     }];
 }
 
@@ -210,7 +211,7 @@
         if ( self.isCompleated ) {
             compleationBlock(self.compleatedValue, self.compleatedError, promise);
         }
-        self.listengers = [self.listengers arrayByAddingObject:[MSPromiseListengerContainer listengerWithPromise:promise compleationBlock:compleationBlock]];
+        self.listengers = [self.listengers arrayByAddingObject:[DPromiseListengerContainer listengerWithPromise:promise compleationBlock:compleationBlock]];
     }
 }
 
@@ -218,8 +219,8 @@
 {
     @synchronized( self ) {
         [self cleanInvalidListengers];
-        self.listengers = [self.listengers linq_where:^BOOL(MSPromiseListengerContainer *object) {
-            return !( object.promise == promise );
+        self.listengers = [self.listengers mapArray:^id(DPromiseListengerContainer *object) {
+            return object.promise == promise ? nil : object;
         }];
         if ( !self.listengers.count )
             [self dispose];
@@ -233,7 +234,7 @@
     self.compleatedValue = prevValue;
     [self cleanInvalidListengers];
     self.debugName = [self.debugName stringByAppendingFormat:@"(%s:[%@])", error? "error": prevValue ? "value" : "nil", NSStringFromClass(error?[error class]: [prevValue class]) ];
-    [self.listengers enumerateObjectsUsingBlock:^(MSPromiseListengerContainer * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [self.listengers enumerateObjectsUsingBlock:^(DPromiseListengerContainer * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         if ( error )
             obj.onCompleate(nil, error, obj.promise );
         if ( prevValue )
