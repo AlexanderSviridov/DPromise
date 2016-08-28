@@ -12,7 +12,9 @@ typedef void(^DPromiseFullfillBlock)(id);
 typedef void(^DPromiseRejectBclock)(NSError *);
 typedef void(^DPromiseDisposable)();
 
-@interface DPromise<__covariant ObjectType> : NSObject
+@interface DPromise<__covariant ObjectType> : NSObject {
+    dispatch_queue_t _queue;
+}
 
 @property (readonly) BOOL isCompleated;
 @property (copy) NSString *debugName;
@@ -21,13 +23,19 @@ typedef void(^DPromiseDisposable)();
 + (instancetype)promiseWithValue:(id)value;
 + (instancetype)promiseWithError:(NSError *)error;
 
-- (id)then:(DPromise *(^)(ObjectType))thenBlock;
-- (id)thenOnBackground:(DPromise *(^)(ObjectType))thenBlock;
-- (id)then:(DPromise *(^)(ObjectType))thenBlock onQueue:(dispatch_queue_t)queue;
+- (id)then:(id(^)(ObjectType))thenBlock;
+- (id)thenOnBackground:(id(^)(ObjectType))thenBlock;
+- (id)then:(id(^)(ObjectType))thenBlock onQueue:(dispatch_queue_t)queue;
+- (id)thenOnCurrentThread:(id (^)(id))thenBlock;
 
-- (id)catch:(DPromise *(^)(NSError *))rejectErrorBlock;
+- (id)catch:(id(^)(NSError *))rejectErrorBlock;
+- (id)catchOnBackground:(id(^)(NSError *))rejectErrorBlock;
+- (id)catch:(id(^)(NSError *))rejectErrorBlock onQueue:(dispatch_queue_t)queue;
+- (id)catchOnCurrentThread:(id(^)(NSError *))rejectErrorBlock;
 
 - (id)once;
+
++ (DPromise<NSArray *> *)merge:(NSArray<DPromise *> *)mergingArray;
 
 - (void)dispose;
 

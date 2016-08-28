@@ -8,7 +8,6 @@
 
 #import "DPromise.h"
 
-//#import "LinqToObjectiveC.h"
 #import "DCollections.h"
 
 @interface DPromiseListengerContainer : NSObject
@@ -92,27 +91,30 @@
     return promise;
 }
 
-- (id)then:(DPromise *(^)(id))thenBlock
+- (id)then:(id(^)(id))thenBlock
 {
     return [self then:thenBlock onQueue:dispatch_get_main_queue()];
 }
 
-- (id)thenOnBackground:(DPromise *(^)(id))thenBlock
+- (id)thenOnBackground:(id(^)(id))thenBlock
 {
     return [self then:thenBlock onQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
 }
 
-- (id)then:(DPromise *(^)(id))thenBlock onQueue:(dispatch_queue_t)queue
+- (id)then:(id(^)(id))thenBlock onQueue:(dispatch_queue_t)queue
 {
     DPromise *newPromise = [DPromise new];
+    if ( !thenBlock ) {
+        return self;
+    }
+    dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"then%@ ", [DPromise callStackName:1] ];
     [self addListengerWithPromise:newPromise onCompleation:^(id next, NSError *error, DPromise *owner) {
         if ( !error ) {
-            dispatch_async(queue, ^{
+            dispatch_async(runningQueue, ^{
                 DPromise *nextPromise = thenBlock(next);
-                if ( !nextPromise )
-                    [owner onValue:next error:nil];
-                else if ( [nextPromise isKindOfClass:[DPromise class]] ) {
+                if ( [nextPromise isKindOfClass:[DPromise class]] ) {
+                    nextPromise->_queue = runningQueue;
                     owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise:%@)", nextPromise.debugName ];
                     [nextPromise addListengerWithPromise:owner onCompleation:^(id next, NSError *error, DPromise *owner) {
                         [owner onValue:next error:error];
@@ -131,14 +133,36 @@
     return newPromise;
 }
 
-- (id)catch:(DPromise *(^)(NSError *))rejectErrorBlock
+- (id)thenOnCurrentThread:(id (^)(id))thenBlock
+{
+    return [self then:thenBlock onQueue:_queue];
+}
+
+- (id)catch:(id(^)(NSError *))rejectErrorBlock
+{
+    return [self catch:rejectErrorBlock onQueue:dispatch_get_main_queue()];
+}
+
+- (id)catchOnBackground:(id (^)(NSError *))rejectErrorBlock
+{
+    return [self catch:rejectErrorBlock onQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+}
+
+- (id)catchOnCurrentThread:(id (^)(NSError *))rejectErrorBlock
+{
+    return [self catch:rejectErrorBlock onQueue:_queue];
+}
+
+- (id)catch:(id (^)(NSError *))rejectErrorBlock onQueue:(dispatch_queue_t)queue
 {
     DPromise *newPromise = [DPromise new];
+    dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"catch%@ ", [DPromise callStackName:1] ];
     [self addListengerWithPromise:newPromise onCompleation:^(id next, NSError *error, DPromise *owner) {
         if ( error ) {
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(runningQueue, ^{
                 DPromise *nextPromise = rejectErrorBlock(error);
+                nextPromise->_queue = runningQueue;
                 if ( !nextPromise )
                     [owner onValue:nil error:error];
                 else if ( [nextPromise isKindOfClass:[DPromise class]] ) {
@@ -157,6 +181,7 @@
             [owner onValue:next error:nil];
     }];
     return newPromise;
+    
 }
 
 - (id)once
@@ -176,6 +201,71 @@
             if ( promise ) [promise dispose];
         };
     }];
+}
+
++ (DPromise *)merge:(DPromise *)promise withPromise:(DPromise *)otherPromise
+{
+    return [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
+        __block id firstValue = nil, secondValue = nil;
+        DPromise *firstPromise, *secondPromise;
+        void (^invoke)() = ^{
+            if ( firstValue && secondValue ) {
+                fullfil( [@[ firstValue, secondValue] flattern] );
+            }
+        };
+        
+        if ( [promise isKindOfClass:[DPromise class]] ) {
+            firstPromise = [promise then:^id(id nextFirstValue) {
+                firstValue = nextFirstValue;
+                invoke();
+                return nextFirstValue;
+            }];
+        }
+        else {
+            firstValue = promise;
+        }
+        
+        if ( [otherPromise isKindOfClass:[DPromise class]] ) {
+            secondPromise = [otherPromise then:^id(id nextSecondValue) {
+                secondValue = nextSecondValue;
+                invoke();
+                return nextSecondValue;
+            }];
+        }
+        else {
+            secondValue = otherPromise;
+        }
+        
+        invoke();
+        
+        return ^{
+            [firstPromise dispose];
+            [secondPromise dispose];
+        };
+    }];
+}
+
++ (DPromise<NSArray *> *)merge:(NSArray<DPromise *> *)mergingArray
+{
+    if ( !mergingArray.count )
+        return nil;
+    if ( mergingArray.count == 1 ) {
+        DPromise *mergePromise = mergingArray[0];
+        if ( [mergePromise isKindOfClass:[DPromise class]] ) {
+            return [mergePromise then:^id(id value) {
+                return @[ value ];
+            }];
+        }
+        return [DPromise promiseWithValue:mergePromise];
+    }
+    if ( mergingArray.count == 2 ) {
+        return [DPromise merge:mergingArray[0] withPromise:mergingArray[1]];
+    }
+    return [DPromise merge:mergingArray[0] withPromise:[self merge:({
+        NSMutableArray *otherArray = [mergingArray mutableCopy];
+        [otherArray removeObjectAtIndex:0];
+        [otherArray copy];
+    })]];
 }
 
 - (void)dispose

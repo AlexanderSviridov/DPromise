@@ -17,6 +17,7 @@
 		B62F2CA01C8E417400395D41 /* DPromiseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B62F2C9F1C8E417400395D41 /* DPromiseTests.m */; };
 		B62F2CAB1C8E417400395D41 /* DPromiseUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = B62F2CAA1C8E417400395D41 /* DPromiseUITests.m */; };
 		B62F2CBB1C8E4B5F00395D41 /* DPromise.m in Sources */ = {isa = PBXBuildFile; fileRef = B62F2CBA1C8E4B5F00395D41 /* DPromise.m */; };
+		B654F6F41D72745D00240369 /* DPromise+ValueCheck.m in Sources */ = {isa = PBXBuildFile; fileRef = B654F6F31D72745D00240369 /* DPromise+ValueCheck.m */; };
 		B66EFEDC1D4FACE300E8BB5D /* DCollections.m in Sources */ = {isa = PBXBuildFile; fileRef = B66EFEDB1D4FACE300E8BB5D /* DCollections.m */; };
 		CD080C2904FBBBE6D01002DD /* libPods-DPromiseTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E06BA31D866D3B9398284D9 /* libPods-DPromiseTests.a */; };
 /* End PBXBuildFile section */
@@ -61,6 +62,8 @@
 		B62F2CAC1C8E417400395D41 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B62F2CB91C8E4B5F00395D41 /* DPromise.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPromise.h; sourceTree = "<group>"; };
 		B62F2CBA1C8E4B5F00395D41 /* DPromise.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DPromise.m; sourceTree = "<group>"; };
+		B654F6F21D72745D00240369 /* DPromise+ValueCheck.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DPromise+ValueCheck.h"; sourceTree = "<group>"; };
+		B654F6F31D72745D00240369 /* DPromise+ValueCheck.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DPromise+ValueCheck.m"; sourceTree = "<group>"; };
 		B66EFEDA1D4FACE300E8BB5D /* DCollections.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCollections.h; sourceTree = "<group>"; };
 		B66EFEDB1D4FACE300E8BB5D /* DCollections.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DCollections.m; sourceTree = "<group>"; };
 		C63FC608E67B4958EACD01DC /* Pods-DPromiseTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DPromiseTests.debug.xcconfig"; path = "../Pods/Target Support Files/Pods-DPromiseTests/Pods-DPromiseTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -173,6 +176,8 @@
 		B62F2CB81C8E4B5F00395D41 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				B654F6F21D72745D00240369 /* DPromise+ValueCheck.h */,
+				B654F6F31D72745D00240369 /* DPromise+ValueCheck.m */,
 				B66EFEDA1D4FACE300E8BB5D /* DCollections.h */,
 				B66EFEDB1D4FACE300E8BB5D /* DCollections.m */,
 				B62F2CB91C8E4B5F00395D41 /* DPromise.h */,
@@ -428,6 +433,7 @@
 				B62F2CBB1C8E4B5F00395D41 /* DPromise.m in Sources */,
 				B62F2C8A1C8E417400395D41 /* AppDelegate.m in Sources */,
 				B62F2C871C8E417400395D41 /* main.m in Sources */,
+				B654F6F41D72745D00240369 /* DPromise+ValueCheck.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
