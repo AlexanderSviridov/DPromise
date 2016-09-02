@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 typedef void(^DPromiseFullfillBlock)(id);
-typedef void(^DPromiseRejectBclock)(NSError *);
 typedef void(^DPromiseDisposable)();
 
 @interface DPromise<__covariant ObjectType> : NSObject {
@@ -19,7 +18,7 @@ typedef void(^DPromiseDisposable)();
 @property (readonly) BOOL isCompleated;
 @property (copy) NSString *debugName;
 
-+ (instancetype)newPromise:(DPromiseDisposable(^)(DPromiseFullfillBlock,DPromiseRejectBclock))block;
++ (instancetype)newPromise:(DPromiseDisposable(^)(DPromiseFullfillBlock))block;
 + (instancetype)promiseWithValue:(id)value;
 + (instancetype)promiseWithError:(NSError *)error;
 

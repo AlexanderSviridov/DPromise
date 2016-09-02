@@ -50,12 +50,12 @@
 - (void)testMerge {
     XCTestExpectation *expectation = [self expectationWithDescription:@""];
     
-    [[DPromise merge:@[[DPromise promiseWithValue:@(1)], [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
+    [[DPromise merge:@[[DPromise promiseWithValue:@(1)], [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
         dispatch_async(dispatch_get_main_queue(), ^{
             fullfil(@(2));
         });
         return nil;
-    }], @(3), [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
+    }], @(3), [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             fullfil(@(4));
         });
@@ -79,7 +79,7 @@
 - (void)testClassCheck {
     XCTestExpectation *expectation = [self expectationWithDescription:@""];
     
-    [[[[DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
+    [[[[DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
         dispatch_async(dispatch_get_main_queue(), ^{
             fullfil(@"");
             fullfil(@(2));
@@ -105,7 +105,7 @@
 - (void)testCreation
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@""];
-    DPromise *newPromise = [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfill, DPromiseRejectBclock reject) {
+    DPromise *newPromise = [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfill) {
         fullfill(@2);
         return nil;
     }];

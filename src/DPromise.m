@@ -13,13 +13,13 @@
 @interface DPromiseListengerContainer : NSObject
 
 @property DPromise *promise;
-@property (copy) void(^onCompleate)(id, NSError *, DPromise *);
+@property (copy) void(^onCompleate)(id, DPromise *);
 
 @end
 
 @implementation DPromiseListengerContainer
 
-+ (instancetype)listengerWithPromise:(DPromise *)promise compleationBlock:(void(^)(id, NSError *, DPromise *))compleation
++ (instancetype)listengerWithPromise:(DPromise *)promise compleationBlock:(void(^)(id, DPromise *))compleation
 {
     DPromiseListengerContainer *container = [DPromiseListengerContainer new];
     container.promise = promise;
@@ -44,21 +44,18 @@
 - (instancetype)init
 {
     self = [super init];
-    if ( self )
-    {
+    if ( self ) {
         _listengers = [NSMutableArray new];
     }
     return self;
 }
 
-+ (instancetype)newPromise:(DPromiseDisposable (^)(DPromiseFullfillBlock, DPromiseRejectBclock))block
++ (instancetype)newPromise:(DPromiseDisposable (^)(DPromiseFullfillBlock))block
 {
     DPromise *resultPromise = [DPromise new];
     resultPromise.debugName = [self callStackName:0];
     resultPromise.disposableBlock = block(^(id fullfil){
-        [resultPromise onValue:fullfil error:nil];
-    }, ^(NSError *reject){
-        [resultPromise onValue:nil error:reject];
+        [resultPromise onValue:fullfil];
     });
     
     return resultPromise;
@@ -71,7 +68,7 @@
 
 + (instancetype)promiseWithValue:(id)value
 {
-    DPromise *promise = [self newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
+    DPromise *promise = [self newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
         fullfil( value );
         return ^{
         };
@@ -82,8 +79,8 @@
 
 + (instancetype)promiseWithError:(NSError *)error
 {
-    DPromise *promise = [self newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
-        reject(error);
+    DPromise *promise = [self newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
+        fullfil(error);
         return ^{
         };
     }];
@@ -109,26 +106,24 @@
     }
     dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"then%@ ", [DPromise callStackName:1] ];
-    [self addListengerWithPromise:newPromise onCompleation:^(id next, NSError *error, DPromise *owner) {
-        if ( !error ) {
+    [self addListengerWithPromise:newPromise onCompleation:^(id next, DPromise *owner) {
+        if ( ![next isKindOfClass:[NSError class]] ) {
             dispatch_async(runningQueue, ^{
                 DPromise *nextPromise = thenBlock(next);
                 if ( [nextPromise isKindOfClass:[DPromise class]] ) {
                     nextPromise->_queue = runningQueue;
                     owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise:%@)", nextPromise.debugName ];
-                    [nextPromise addListengerWithPromise:owner onCompleation:^(id next, NSError *error, DPromise *owner) {
-                        [owner onValue:next error:error];
+                    [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
+                        [owner onValue:next];
                     }];
                 }
-                else if ( [nextPromise isKindOfClass:[NSError class]] )
-                    [owner onValue:nil error:(NSError *)nextPromise];
                 else
-                    [owner onValue:nextPromise error:nil];
+                    [owner onValue:nextPromise];
             });
             return;
         }
         else
-            [owner onValue:nil error:error];
+            [owner onValue:next];
     }];
     return newPromise;
 }
@@ -158,27 +153,25 @@
     DPromise *newPromise = [DPromise new];
     dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"catch%@ ", [DPromise callStackName:1] ];
-    [self addListengerWithPromise:newPromise onCompleation:^(id next, NSError *error, DPromise *owner) {
-        if ( error ) {
+    [self addListengerWithPromise:newPromise onCompleation:^(id next, DPromise *owner) {
+        if ( [next isKindOfClass:[NSError class]] ) {
             dispatch_async(runningQueue, ^{
-                DPromise *nextPromise = rejectErrorBlock(error);
+                DPromise *nextPromise = rejectErrorBlock(next);
                 nextPromise->_queue = runningQueue;
                 if ( !nextPromise )
-                    [owner onValue:nil error:error];
+                    [owner onValue:next];
                 else if ( [nextPromise isKindOfClass:[DPromise class]] ) {
                     owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise%@)", nextPromise.debugName ];
-                    [nextPromise addListengerWithPromise:owner onCompleation:^(id next, NSError *error, DPromise *owner) {
-                        [owner onValue:next error:error];
+                    [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
+                        [owner onValue:next];
                     }];
                 }
-                else if ( [nextPromise isKindOfClass:[NSError class]] )
-                    [owner onValue:nil error:(NSError *)nextPromise];
                 else
-                    [owner onValue:nextPromise error:nil];
+                    [owner onValue:nextPromise];
             });
         }
         else
-            [owner onValue:next error:nil];
+            [owner onValue:next];
     }];
     return newPromise;
     
@@ -189,12 +182,12 @@
     if ( self.isCompleated )
         return self.compleatedError ? [DPromise promiseWithError:self.compleatedError] : [DPromise promiseWithValue:self.compleatedValue];
     
-    return [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fulfil, DPromiseRejectBclock reject) {
+    return [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fulfil) {
         __weak DPromise *promise = [[self then:^DPromise *(id result) {
             fulfil( result );
             return nil;
         }] catch:^DPromise *(NSError *error) {
-            reject( error );
+            fulfil( error );
             return nil;
         }];
         return ^{
@@ -205,7 +198,7 @@
 
 + (DPromise *)merge:(DPromise *)promise withPromise:(DPromise *)otherPromise
 {
-    return [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil, DPromiseRejectBclock reject) {
+    return [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
         __block id firstValue = nil, secondValue = nil;
         DPromise *firstPromise, *secondPromise;
         void (^invoke)() = ^{
@@ -291,7 +284,7 @@
     }];
 }
 
-- (void)addListengerWithPromise:(DPromise *)promise onCompleation:(void(^)(id, NSError *, DPromise *))compleationBlock
+- (void)addListengerWithPromise:(DPromise *)promise onCompleation:(void(^)(id, DPromise *))compleationBlock
 {
     @synchronized( self ) {
         if ( promise.prevPromise ) {
@@ -299,7 +292,7 @@
         }
         promise.prevPromise = self;
         if ( self.isCompleated ) {
-            compleationBlock(self.compleatedValue, self.compleatedError, promise);
+            compleationBlock(self.compleatedValue, promise);
         }
         self.listengers = [self.listengers arrayByAddingObject:[DPromiseListengerContainer listengerWithPromise:promise compleationBlock:compleationBlock]];
     }
@@ -317,18 +310,15 @@
     }
 }
 
-- (void)onValue:(id)prevValue error:(NSError *)error
+- (void)onValue:(id)prevValue
 {
     _isCompleated = YES;
-    self.compleatedError = error;
     self.compleatedValue = prevValue;
     [self cleanInvalidListengers];
-    self.debugName = [self.debugName stringByAppendingFormat:@"(%s:[%@])", error? "error": prevValue ? "value" : "nil", NSStringFromClass(error?[error class]: [prevValue class]) ];
+    self.debugName = [self.debugName stringByAppendingFormat:@"(%s:[%@])", [prevValue isKindOfClass:[NSError class]]? "error": prevValue ? "value" : "nil", NSStringFromClass([prevValue class]) ];
     [self.listengers enumerateObjectsUsingBlock:^(DPromiseListengerContainer * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ( error )
-            obj.onCompleate(nil, error, obj.promise );
         if ( prevValue )
-            obj.onCompleate(prevValue,nil, obj.promise );
+            obj.onCompleate(prevValue, obj.promise);
     }];
 }
 
