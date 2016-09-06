@@ -288,7 +288,7 @@
 {
     @synchronized( self ) {
         if ( promise.prevPromise ) {
-            [promise.prevPromise removeListenerWithPromise:self];
+            [promise.prevPromise removeListenerWithPromise:promise];
         }
         promise.prevPromise = self;
         if ( self.isCompleated ) {
