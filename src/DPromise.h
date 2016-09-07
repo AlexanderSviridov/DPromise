@@ -39,3 +39,40 @@ typedef void(^DPromiseDisposable)();
 - (void)dispose;
 
 @end
+
+@interface DPromise<__covariant ObjType> (Operation)
+
++ (instancetype)newWithOperationQueuePriority:(NSOperationQueuePriority)priority block:(void(^)(DPromiseFullfillBlock))block;
+
++ (instancetype)newWithOperationQueuePriority:(NSOperationQueuePriority)priority block:(void(^)(DPromiseFullfillBlock))block disposingblock:(void(^)())disposingBlock;
+
+@end
+
+@interface DPromise<__covariant ObjectType> (ValueCheck)
+
+- (id)thenWithValueClass:(Class)valueClass thenBlock:(id(^)(ObjectType))thenBlock;
+
+- (id)thenOnBackgroundWithValueClass:(Class)valueClass thenBlock:(id(^)(ObjectType))thenBlock;
+
+- (id)thenWithValueClass:(Class)valueClass thenBlock:(id(^)(ObjectType))thenBlock onQueue:(dispatch_queue_t)queue;
+
+- (id)thenOnCurrentThreadWithValueClass:(Class)valueClass thenBlock:(id (^)(id))thenBlock;
+
+- (id)catchWithValueClass:(Class)valueClass catchBlock:(id(^)(NSError *))rejectErrorBlock;
+
+- (id)catchOnBackgroundWithValueClass:(Class)valueClass catchBlock:(id(^)(NSError *))rejectErrorBlock;
+
+- (id)catchWithValueClass:(Class)valueClass catchBlock:(id(^)(NSError *))rejectErrorBlock onQueue:(dispatch_queue_t)queue;
+
+- (id)catchOnCurrentThreadWithValueClass:(Class)valueClass catchBlock:(id(^)(NSError *))rejectErrorBlock;
+
+
+@end
+
+@interface DPromise (Debbug)
+
++ (NSArray<DPromise *> *)allSignals;
++ (void)setDebbugLogging:(BOOL)isDebbugLogging;
+
+@end
+

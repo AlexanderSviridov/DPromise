@@ -10,6 +10,16 @@
 
 #import "DCollections.h"
 
+@interface DWeakContainer<ObjType> : NSObject
+
+@property (weak) ObjType value;
+
+@end
+
+@implementation DWeakContainer
+
+@end
+
 @interface DPromiseListengerContainer : NSObject
 
 @property DPromise *promise;
@@ -29,6 +39,8 @@
 
 @end
 
+static BOOL __dPromiseDebbugLogging = NO;
+
 @interface DPromise ()
 
 @property NSArray<DPromiseListengerContainer *> *listengers;
@@ -46,6 +58,7 @@
     self = [super init];
     if ( self ) {
         _listengers = [NSMutableArray new];
+        [DPromise addListedSignal:self];
     }
     return self;
 }
@@ -324,8 +337,48 @@
 
 - (void)dealloc
 {
+    if ( __dPromiseDebbugLogging ) {
+        NSLog(@"Promises: %@", [self.class.allSignals mapArray:^id(DPromise *promise) {
+            return [promise debugName];
+        }] );
+    }
     if ( self.prevPromise )
         [self.prevPromise removeListenerWithPromise:self];
+}
+
+#pragma mark - Debbug
+
++ (NSMutableArray<DWeakContainer<DPromise *> *> *)allSignalsArray
+{
+    static NSMutableArray<DWeakContainer<DPromise *> *> *__allSignals = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        __allSignals = [NSMutableArray new];
+    });
+    __allSignals = [[__allSignals mapArray:^id(DWeakContainer<DPromise *> *container) {
+        if ( !container.value ) {
+            return nil;
+        }
+        return container;
+    }] mutableCopy];
+    return __allSignals;
+}
+
++ (NSArray<DPromise *> *)allSignals
+{
+    return [self.allSignalsArray copy];
+}
+
++ (void)setDebbugLogging:(BOOL)isDebbugLogging
+{
+    __dPromiseDebbugLogging = isDebbugLogging;
+}
+
++ (void)addListedSignal:(DPromise *)signal
+{
+    DWeakContainer *container = [DWeakContainer new];
+    container.value = signal;
+    [self.allSignalsArray addObject:container];
 }
 
 + (NSString *)string:(NSString *)string ByRemovingRegex:(NSString *)regex
@@ -339,3 +392,95 @@
 
 @end
 
+@implementation DPromise (Operation)
+
++ (instancetype)newWithOperationQueuePriority:(NSOperationQueuePriority)priority block:(void (^)(DPromiseFullfillBlock))block
+{
+    DPromise *resultPromise = [DPromise newWithOperationQueuePriority:priority block:block disposingblock:nil];
+    resultPromise.debugName = [self callStackName:0];
+    return resultPromise;
+}
+
++ (instancetype)newWithOperationQueuePriority:(NSOperationQueuePriority)priority block:(void (^)(DPromiseFullfillBlock))block disposingblock:(void (^)())disposingBlock
+{
+    if ( !block )
+        return nil;
+    DPromise *resultPromise = [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
+        NSBlockOperation *operation = [NSBlockOperation blockOperationWithBlock:^{
+            block(fullfil);
+        }];
+        operation.queuePriority = priority;
+        [operation start];
+        __weak NSBlockOperation *_weakOpertion = operation;
+        return ^{
+            if ( _weakOpertion )
+                [_weakOpertion cancel];
+            
+            if ( disposingBlock ) {
+                disposingBlock();
+            }
+        };
+    }];
+    resultPromise.debugName = [self callStackName:0];
+    return resultPromise;
+}
+
+@end
+
+@implementation DPromise (ValueCheck)
+
+- (id)thenWithValueClass:(Class)valueClass
+               thenBlock:(id(^)(id))thenBlock
+{
+    return [self thenWithValueClass:valueClass thenBlock:thenBlock onQueue:dispatch_get_main_queue()];
+}
+
+- (id)thenOnBackgroundWithValueClass:(Class)valueClass
+                           thenBlock:(id(^)(id))thenBlock
+{
+    return [self thenWithValueClass:valueClass thenBlock:thenBlock onQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+}
+
+- (id)thenWithValueClass:(Class)valueClass
+               thenBlock:(id(^)(id))thenBlock
+                 onQueue:(dispatch_queue_t)queue
+{
+    return [self then:^id(id nextValue) {
+        return [nextValue isKindOfClass:valueClass] ? thenBlock(nextValue) : nextValue;
+    } onQueue:queue];
+}
+
+- (id)thenOnCurrentThreadWithValueClass:(Class)valueClass
+                              thenBlock:(id (^)(id))thenBlock
+{
+    return [self thenWithValueClass:valueClass thenBlock:thenBlock onQueue:_queue];
+}
+
+- (id)catchWithValueClass:(Class)valueClass
+               catchBlock:(id(^)(NSError *))rejectErrorBlock
+{
+    return [self catchWithValueClass:valueClass catchBlock:rejectErrorBlock onQueue:dispatch_get_main_queue()];
+}
+
+- (id)catchOnBackgroundWithValueClass:(Class)valueClass
+                           catchBlock:(id(^)(NSError *))rejectErrorBlock
+{
+    return [self catchWithValueClass:valueClass catchBlock:rejectErrorBlock onQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+}
+
+- (id)catchWithValueClass:(Class)valueClass
+               catchBlock:(id(^)(NSError *))rejectErrorBlock
+                  onQueue:(dispatch_queue_t)queue
+{
+    return [self catch:^id(NSError *error) {
+        return [error isKindOfClass:valueClass] ? rejectErrorBlock(error) : error;
+    } onQueue:queue];
+}
+
+- (id)catchOnCurrentThreadWithValueClass:(Class)valueClass
+                              catchBlock:(id(^)(NSError *))rejectErrorBlock
+{
+    return [self catchWithValueClass:valueClass catchBlock:rejectErrorBlock onQueue:_queue];
+}
+
+@end

@@ -9,7 +9,6 @@
 #import <XCTest/XCTest.h>
 
 #import "DPromise.h"
-#import "DPromise+ValueCheck.h"
 
 @interface DPromiseTests : XCTestCase
 
