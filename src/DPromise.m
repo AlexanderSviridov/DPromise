@@ -366,7 +366,9 @@ static BOOL __dPromiseDebbugLogging = NO;
 
 + (NSArray<DPromise *> *)allSignals
 {
-    return [self.allSignalsArray copy];
+    return [self.allSignalsArray mapArray:^id(DWeakContainer<DPromise *> *container) {
+        return container.value;
+    }];
 }
 
 + (void)setDebbugLogging:(BOOL)isDebbugLogging
