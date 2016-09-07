@@ -25,6 +25,8 @@
 - (NSArray *)flattern;
 - (NSArray *)flatternMapArray:(id(^)(ObjectType))mappingBlock;
 
+- (id)reduceWithValue:(id)value block:(id(^)(id reducingValue, ObjectType collectionValue))block;
+
 @end
 
 @interface NSDictionary (DCollections)

@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 
 #import "DPromise.h"
+#import "DCollections.h"
 
 @interface DPromiseTests : XCTestCase
 
@@ -24,6 +25,14 @@
 - (void)tearDown {
     // Put teardown code here. This method is called after the invocation of each test method in the class.
     [super tearDown];
+}
+
+- (void)testReduce
+{
+    NSNumber *result = [@[ @2, @3, @4 ] reduceWithValue:@0 block:^id(NSNumber *reducingValue, NSNumber *collectionValue) {
+        return @(reducingValue.intValue + collectionValue.intValue);
+    }];
+    XCTAssert(result.intValue == 9 );
 }
 
 - (void)testEmptyChain {

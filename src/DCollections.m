@@ -122,6 +122,18 @@
     return [NSArray arrayWithArray:arr];
 }
 
+- (id)reduceWithValue:(id)value block:(id (^)(id, id))block
+{
+    if ( !block || !value ) {
+        return nil;
+    }
+    id resultValue = value;
+    for (id collectionValue in self) {
+        resultValue = block(resultValue, collectionValue);
+    }
+    return resultValue;
+}
+
 @end
 
 @implementation NSDictionary (DCollections)
