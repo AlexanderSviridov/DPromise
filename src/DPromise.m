@@ -170,10 +170,10 @@ static BOOL __dPromiseDebbugLogging = NO;
         if ( [next isKindOfClass:[NSError class]] ) {
             dispatch_async(runningQueue, ^{
                 DPromise *nextPromise = rejectErrorBlock(next);
-                nextPromise->_queue = runningQueue;
                 if ( !nextPromise )
                     [owner onValue:next];
                 else if ( [nextPromise isKindOfClass:[DPromise class]] ) {
+                    nextPromise->_queue = runningQueue;
                     owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise%@)", nextPromise.debugName ];
                     [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
                         [owner onValue:next];
