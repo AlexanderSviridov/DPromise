@@ -26,6 +26,8 @@
 - (NSArray *)flatternMapArray:(id(^)(ObjectType))mappingBlock;
 
 - (id)reduceWithValue:(id)value block:(id(^)(id reducingValue, ObjectType collectionValue))block;
+- (id)reduceWithblock:(id(^)(ObjectType collectionValue, ObjectType enotherValue))block;
+- (ObjectType)findElementWithblock:(BOOL(^)(ObjectType))block;
 
 @end
 

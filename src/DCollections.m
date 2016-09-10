@@ -134,6 +134,38 @@
     return resultValue;
 }
 
+- (id)reduceWithblock:(id (^)(id, id))block
+{
+    if ( !block ) {
+        return nil;
+    }
+    if ( self.count < 2 ) {
+        return nil;
+    }
+    id resultValue = nil;
+    for (id collectionValue in self) {
+        if ( !resultValue ) {
+            resultValue = collectionValue;
+            continue;
+        }
+        resultValue = block(resultValue, collectionValue);
+    }
+    return resultValue;
+}
+
+- (id)findElementWithblock:(BOOL (^)(id))block
+{
+    if ( !block ) {
+        return nil;
+    }
+    for (id obj in self) {
+        if ( block( obj ) ) {
+            return obj;
+        }
+    }
+    return nil;
+}
+
 @end
 
 @implementation NSDictionary (DCollections)
