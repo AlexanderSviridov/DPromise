@@ -342,8 +342,7 @@ static BOOL __dPromiseDebbugLogging = NO;
             return [promise debugName];
         }] );
     }
-    if ( self.prevPromise )
-        [self.prevPromise removeListenerWithPromise:self];
+    [self dispose];
 }
 
 #pragma mark - Debbug
