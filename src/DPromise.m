@@ -216,7 +216,7 @@ static BOOL __dPromiseDebbugLogging = NO;
         return self;
     }
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"finaly%@ ", [DPromise callStackName:0] ];
-    [newPromise addListengerWithPromise:self onCompleation:^(id result, DPromise *promise) {
+    [self addListengerWithPromise:newPromise onCompleation:^(id result, DPromise *promise) {
         block();
     }];
     return newPromise;
