@@ -27,12 +27,14 @@ typedef void(^DPromiseDisposable)();
 - (id)then:(id(^)(ObjectType))thenBlock onQueue:(dispatch_queue_t)queue;
 - (id)thenOnCurrentThread:(id (^)(id))thenBlock;
 
-- (id)catch:(id(^)(NSError *))rejectErrorBlock;
-- (id)catchOnBackground:(id(^)(NSError *))rejectErrorBlock;
-- (id)catch:(id(^)(NSError *))rejectErrorBlock onQueue:(dispatch_queue_t)queue;
-- (id)catchOnCurrentThread:(id(^)(NSError *))rejectErrorBlock;
+- (instancetype)catch:(id(^)(NSError *))rejectErrorBlock;
+- (instancetype)catchOnBackground:(id(^)(NSError *))rejectErrorBlock;
+- (instancetype)catch:(id(^)(NSError *))rejectErrorBlock onQueue:(dispatch_queue_t)queue;
+- (instancetype)catchOnCurrentThread:(id(^)(NSError *))rejectErrorBlock;
 
-- (id)once;
+- (instancetype)once;
+
+- (instancetype)finaly:(void(^)())block;
 
 + (DPromise<NSArray *> *)merge:(NSArray<DPromise *> *)mergingArray;
 

@@ -209,6 +209,19 @@ static BOOL __dPromiseDebbugLogging = NO;
     }];
 }
 
+- (instancetype)finaly:(void (^)())block
+{
+    DPromise *newPromise = [DPromise new];
+    if ( !block ) {
+        return self;
+    }
+    newPromise.debugName = [self.debugName stringByAppendingFormat:@"finaly%@ ", [DPromise callStackName:0] ];
+    [newPromise addListengerWithPromise:self onCompleation:^(id result, DPromise *promise) {
+        block();
+    }];
+    return newPromise;
+}
+
 + (DPromise *)merge:(DPromise *)promise withPromise:(DPromise *)otherPromise
 {
     return [DPromise newPromise:^DPromiseDisposable(DPromiseFullfillBlock fullfil) {
