@@ -58,7 +58,8 @@ static BOOL __dPromiseDebbugLogging = NO;
     self = [super init];
     if ( self ) {
         _listengers = [NSMutableArray new];
-        [DPromise addListedSignal:self];
+        if ( __dPromiseDebbugLogging )
+            [DPromise addListedSignal:self];
     }
     return self;
 }
@@ -119,19 +120,22 @@ static BOOL __dPromiseDebbugLogging = NO;
     }
     dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"then%@ ", [DPromise callStackName:1] ];
+    typeof(self) self_weak__ = self;
     [self addListengerWithPromise:newPromise onCompleation:^(id next, DPromise *owner) {
         if ( ![next isKindOfClass:[NSError class]] ) {
             dispatch_async(runningQueue, ^{
-                DPromise *nextPromise = thenBlock(next);
-                if ( [nextPromise isKindOfClass:[DPromise class]] ) {
-                    nextPromise->_queue = runningQueue;
-                    owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise:%@)", nextPromise.debugName ];
-                    [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
-                        [owner onValue:next];
-                    }];
+                @synchronized (self_weak__) {
+                    DPromise *nextPromise = thenBlock(next);
+                    if ( [nextPromise isKindOfClass:[DPromise class]] ) {
+                        nextPromise->_queue = runningQueue;
+                        owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise:%@)", nextPromise.debugName ];
+                        [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
+                            [owner onValue:next];
+                        }];
+                    }
+                    else
+                        [owner onValue:nextPromise];
                 }
-                else
-                    [owner onValue:nextPromise];
             });
             return;
         }
@@ -367,12 +371,14 @@ static BOOL __dPromiseDebbugLogging = NO;
     dispatch_once(&onceToken, ^{
         __allSignals = [NSMutableArray new];
     });
-    __allSignals = [[__allSignals mapArray:^id(DWeakContainer<DPromise *> *container) {
-        if ( !container.value ) {
-            return nil;
-        }
-        return container;
-    }] mutableCopy];
+    @synchronized (self) {
+        __allSignals = [[__allSignals mapArray:^id(DWeakContainer<DPromise *> *container) {
+            if ( !container.value ) {
+                return nil;
+            }
+            return container;
+        }] mutableCopy];
+    }
     return __allSignals;
 }
 
@@ -390,9 +396,11 @@ static BOOL __dPromiseDebbugLogging = NO;
 
 + (void)addListedSignal:(DPromise *)signal
 {
-    DWeakContainer *container = [DWeakContainer new];
-    container.value = signal;
-    [self.allSignalsArray addObject:container];
+    @synchronized (self) {
+        DWeakContainer *container = [DWeakContainer new];
+        container.value = signal;
+        [self.allSignalsArray addObject:container];
+    }
 }
 
 + (NSString *)string:(NSString *)string ByRemovingRegex:(NSString *)regex
