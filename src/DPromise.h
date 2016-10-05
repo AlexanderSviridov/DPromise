@@ -36,6 +36,8 @@ typedef void(^DPromiseDisposable)();
 
 - (instancetype)finaly:(void(^)())block;
 
+- (void)sendNext:(id)nextValue;
+
 + (DPromise<NSArray *> *)merge:(NSArray<DPromise *> *)mergingArray;
 
 - (void)dispose;

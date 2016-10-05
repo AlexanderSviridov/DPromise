@@ -69,7 +69,7 @@ static BOOL __dPromiseDebbugLogging = NO;
     DPromise *resultPromise = [DPromise new];
     resultPromise.debugName = [self callStackName:0];
     resultPromise.disposableBlock = block(^(id fullfil){
-        [resultPromise onValue:fullfil];
+        [resultPromise sendNext:fullfil];
     });
     
     return resultPromise;
@@ -130,17 +130,17 @@ static BOOL __dPromiseDebbugLogging = NO;
                         nextPromise->_queue = runningQueue;
                         owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise:%@)", nextPromise.debugName ];
                         [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
-                            [owner onValue:next];
+                            [owner sendNext:next];
                         }];
                     }
                     else
-                        [owner onValue:nextPromise];
+                        [owner sendNext:nextPromise];
                 }
             });
             return;
         }
         else
-            [owner onValue:next];
+            [owner sendNext:next];
     }];
     return newPromise;
 }
@@ -175,20 +175,20 @@ static BOOL __dPromiseDebbugLogging = NO;
             dispatch_async(runningQueue, ^{
                 DPromise *nextPromise = rejectErrorBlock(next);
                 if ( !nextPromise )
-                    [owner onValue:next];
+                    [owner sendNext:next];
                 else if ( [nextPromise isKindOfClass:[DPromise class]] ) {
                     nextPromise->_queue = runningQueue;
                     owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise%@)", nextPromise.debugName ];
                     [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
-                        [owner onValue:next];
+                        [owner sendNext:next];
                     }];
                 }
                 else
-                    [owner onValue:nextPromise];
+                    [owner sendNext:nextPromise];
             });
         }
         else
-            [owner onValue:next];
+            [owner sendNext:next];
     }];
     return newPromise;
     
@@ -340,15 +340,15 @@ static BOOL __dPromiseDebbugLogging = NO;
     }
 }
 
-- (void)onValue:(id)prevValue
+- (void)sendNext:(id)nextValue
 {
     _isCompleated = YES;
-    self.compleatedValue = prevValue;
+    self.compleatedValue = nextValue;
     [self cleanInvalidListengers];
-    self.debugName = [self.debugName stringByAppendingFormat:@"(%s:[%@])", [prevValue isKindOfClass:[NSError class]]? "error": prevValue ? "value" : "nil", NSStringFromClass([prevValue class]) ];
+    self.debugName = [self.debugName stringByAppendingFormat:@"(%s:[%@])", [nextValue isKindOfClass:[NSError class]]? "error": nextValue ? "value" : "nil", NSStringFromClass([nextValue class]) ];
     [self.listengers enumerateObjectsUsingBlock:^(DPromiseListengerContainer * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ( prevValue )
-            obj.onCompleate(prevValue, obj.promise);
+        if ( nextValue )
+            obj.onCompleate(nextValue, obj.promise);
     }];
 }
 
