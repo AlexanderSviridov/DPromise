@@ -271,7 +271,7 @@ static BOOL __dPromiseDebbugLogging = NO;
 + (DPromise<NSArray *> *)merge:(NSArray<DPromise *> *)mergingArray
 {
     if ( !mergingArray.count )
-        return nil;
+        return [DPromise promiseWithValue:@[]];
     if ( mergingArray.count == 1 ) {
         DPromise *mergePromise = mergingArray[0];
         if ( [mergePromise isKindOfClass:[DPromise class]] ) {
