@@ -317,9 +317,9 @@ static BOOL __dPromiseDebbugLogging = NO;
 - (void)addListengerWithPromise:(DPromise *)promise onCompleation:(void(^)(id, DPromise *))compleationBlock
 {
     @synchronized( self ) {
-        if ( promise.prevPromise ) {
-            [promise.prevPromise removeListenerWithPromise:promise];
-        }
+//        if ( promise.prevPromise ) {
+//            [promise.prevPromise removeListenerWithPromise:promise];
+//        }
         promise.prevPromise = self;
         if ( self.isCompleated ) {
             compleationBlock(self.compleatedValue, promise);
