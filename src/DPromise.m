@@ -321,7 +321,7 @@ static BOOL __dPromiseDebbugLogging = NO;
 //            [promise.prevPromise removeListenerWithPromise:promise];
 //        }
         promise.prevPromise = self;
-        if ( self.isCompleated ) {
+        if ( self.isCompleated && self.repeatingLast ) {
             compleationBlock(self.compleatedValue, promise);
         }
         self.listengers = [self.listengers arrayByAddingObject:[DPromiseListengerContainer listengerWithPromise:promise compleationBlock:compleationBlock]];

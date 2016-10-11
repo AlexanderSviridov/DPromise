@@ -17,6 +17,7 @@ typedef void(^DPromiseDisposable)();
 
 @property (readonly) BOOL isCompleated;
 @property (copy) NSString *debugName;
+@property BOOL repeatingLast;
 
 + (instancetype)newPromise:(DPromiseDisposable(^)(DPromiseFullfillBlock))block;
 + (instancetype)promiseWithValue:(id)value;
