@@ -58,6 +58,7 @@ static BOOL __dPromiseDebbugLogging = NO;
     self = [super init];
     if ( self ) {
         _listengers = [NSMutableArray new];
+        self.repeatingLast = YES;
         if ( __dPromiseDebbugLogging )
             [DPromise addListedSignal:self];
     }
@@ -321,7 +322,7 @@ static BOOL __dPromiseDebbugLogging = NO;
 //            [promise.prevPromise removeListenerWithPromise:promise];
 //        }
         promise.prevPromise = self;
-        if ( self.isCompleated ) {
+        if ( self.isCompleated && self.repeatingLast ) {
             compleationBlock(self.compleatedValue, promise);
         }
         self.listengers = [self.listengers arrayByAddingObject:[DPromiseListengerContainer listengerWithPromise:promise compleationBlock:compleationBlock]];
