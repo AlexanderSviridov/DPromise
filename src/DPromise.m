@@ -119,16 +119,16 @@ static BOOL __dPromiseDebbugLogging = NO;
     if ( !thenBlock ) {
         return self;
     }
-    dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
+//    dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"then%@ ", [DPromise callStackName:1] ];
     typeof(self) self_weak__ = self;
     [self addListengerWithPromise:newPromise onCompleation:^(id next, DPromise *owner) {
         if ( ![next isKindOfClass:[NSError class]] ) {
-            dispatch_async(runningQueue, ^{
+            void (^block)() = ^{
                 @synchronized (self_weak__) {
                     DPromise *nextPromise = thenBlock(next);
                     if ( [nextPromise isKindOfClass:[DPromise class]] ) {
-                        nextPromise->_queue = runningQueue;
+                        nextPromise->_queue = queue;
                         owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise:%@)", nextPromise.debugName ];
                         [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
                             [owner sendNext:next];
@@ -137,7 +137,13 @@ static BOOL __dPromiseDebbugLogging = NO;
                     else
                         [owner sendNext:nextPromise];
                 }
-            });
+            };
+            if ( queue ) {
+                dispatch_async(queue, block);
+            }
+            else {
+                block();
+            }
             return;
         }
         else
@@ -169,16 +175,15 @@ static BOOL __dPromiseDebbugLogging = NO;
 - (id)catch:(id (^)(NSError *))rejectErrorBlock onQueue:(dispatch_queue_t)queue
 {
     DPromise *newPromise = [DPromise new];
-    dispatch_queue_t runningQueue = queue ?: dispatch_get_main_queue();
     newPromise.debugName = [self.debugName stringByAppendingFormat:@"catch%@ ", [DPromise callStackName:1] ];
     [self addListengerWithPromise:newPromise onCompleation:^(id next, DPromise *owner) {
         if ( [next isKindOfClass:[NSError class]] ) {
-            dispatch_async(runningQueue, ^{
+            void (^block)() = ^{
                 DPromise *nextPromise = rejectErrorBlock(next);
                 if ( !nextPromise )
                     [owner sendNext:next];
                 else if ( [nextPromise isKindOfClass:[DPromise class]] ) {
-                    nextPromise->_queue = runningQueue;
+                    nextPromise->_queue = queue;
                     owner.debugName = [owner.debugName stringByAppendingFormat:@"(promise%@)", nextPromise.debugName ];
                     [nextPromise addListengerWithPromise:owner onCompleation:^(id next, DPromise *owner) {
                         [owner sendNext:next];
@@ -186,7 +191,13 @@ static BOOL __dPromiseDebbugLogging = NO;
                 }
                 else
                     [owner sendNext:nextPromise];
-            });
+            };
+            if ( queue ) {
+                dispatch_async(queue, block);
+            }
+            else {
+                block();
+            }
         }
         else
             [owner sendNext:next];
